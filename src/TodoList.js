@@ -6,6 +6,7 @@ class TodoList extends Component {
   }
 
   render() {
+    console.log("TodoList render() called.")
     return (
       <div className="todoListMain">
         <div className="header">

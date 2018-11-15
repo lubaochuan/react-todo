@@ -8,15 +8,30 @@ class App extends Component {
     super()
     this.state = {
       items: [],
-      currentItem: {text:'', key:''},
+      currentItem: {text: '', key: '', completed: false},
     }
   }
 
   inputElement = React.createRef()
 
   handleInput = event => {
+    const new_current =
+      {text: event.target.value, key: Date.now(), completed: false}
+    console.log("new current: ")
+    console.log(new_current)
     this.setState({
-      currentItem: {text:event.target.value, key: Date.now()}
+      currentItem: new_current
+    })
+  }
+
+  toggleComplete = key => {
+    const updatedItems =
+      this.state.items.map(item => {
+        return item.key === key? {...item, completed: !item.completed}:item
+      })
+    this.setState({
+      items: updatedItems,
+      currentItem: {text: '', key: '', completed: false},
     })
   }
 
@@ -44,13 +59,23 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
+      <div className="todoListMain">
         <TodoList
           addItem={this.addItem}
           inputElement={this.inputElement}
           handleInput={this.handleInput}
           currentItem={this.state.currentItem} />
-        <TodoItems entries={this.state.items} deleteItem={this.deleteItem}/>
+        <TodoItems
+          title={"Active:"}
+          entries={this.state.items}
+          showComplete={false}
+          toggleComplete={this.toggleComplete}/>
+        <TodoItems
+          title={"Completed:"}
+          entries={this.state.items}
+          deleteItem={this.deleteItem}
+          showComplete={true}
+          toggleComplete={this.toggleComplete}/>
       </div>
     )
   }
