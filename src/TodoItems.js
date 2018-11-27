@@ -1,13 +1,23 @@
 import React, { Component } from 'react'
+import { Icon } from 'react-materialize'
 
 class TodoItems extends Component {
   createTasks = (item) => {
+    const {toggleComplete, deleteItem, showComplete} = this.props;
+    const checkedString =
+      item.completed?'radio_button_checked':'radio_button_unchecked';
+
     return (
       <li key={item.key}>
-        <input type="checkbox"
-          checked={item.completed}
-          onChange={()=>this.props.toggleComplete(item.key)}/>
-        {item.text}</li>)
+        <span onClick={()=>toggleComplete(item.key)}>
+          <Icon left>{checkedString}</Icon>
+        </span>
+        {item.text}
+        {showComplete?
+          <span onClick={()=>deleteItem(item.key)}>
+            <Icon right>delete</Icon>
+          </span>:null}
+      </li>)
   }
 
   render() {
