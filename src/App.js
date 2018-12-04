@@ -88,12 +88,25 @@ class App extends Component {
   }
 
   deleteItem = id => {
-    const filteredItems = this.state.items.filter(item => {
-      return item.id !== id
-    })
-    this.setState({
-      items: filteredItems,
-    })
+    fetch(
+      API_URL+'/'+id,
+      {
+        headers:{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'},
+        method: 'DELETE'
+      })
+      .then(response => response.json())
+      .then(result => {
+        console.log('deleted:', result)
+        const filteredItems = this.state.items.filter(item => {
+          return item.id !== id
+        })
+        this.setState({
+          items: filteredItems,
+        })
+      })
+      .catch(err => console.error('Request failed', err))
   }
 
   render() {
