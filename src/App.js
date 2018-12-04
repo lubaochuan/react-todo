@@ -41,14 +41,30 @@ class App extends Component {
   }
 
   toggleComplete = id => {
-    const updatedItems =
-      this.state.items.map(item => {
-        return item.id === id? {...item, completed: !item.completed}:item
+    let item = this.state.items.find(obj => obj.id == id);
+    item = {...item, completed: !item.completed}
+
+    fetch(
+      API_URL+'/'+id,
+      {
+        headers:{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'},
+        method: 'PUT',
+        body: JSON.stringify(item)
       })
-    this.setState({
-      items: updatedItems,
-      currentItem: {text: '', id: '', completed: false},
-    })
+      .then(response => response.json())
+      .then(result => {
+        const updatedItems =
+          this.state.items.map(item => {
+            return item.id === id? {...item, completed: !item.completed}:item
+          })
+        this.setState({
+          items: updatedItems,
+          currentItem: {text: '', id: '', completed: false},
+        })
+      })
+      .catch(err => console.error('Request failed', err))
   }
 
   addItem = event => {
@@ -56,12 +72,12 @@ class App extends Component {
     const newItem = this.state.currentItem
     console.log(newItem)
     fetch(
-      API_URL, 
+      API_URL,
       {
         headers:{
           'Accept': 'application/json',
           'Content-Type': 'application/json'},
-        method: 'POST', 
+        method: 'POST',
         body: JSON.stringify(newItem)
       })
     .then(response => response.json())
