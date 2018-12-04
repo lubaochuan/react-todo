@@ -8,13 +8,13 @@ class TodoItems extends Component {
       item.completed?'radio_button_checked':'radio_button_unchecked';
 
     return (
-      <li key={item.key}>
-        <span onClick={()=>toggleComplete(item.key)}>
+      <li key={item.id}>
+        <span onClick={()=>toggleComplete(item.id)}>
           <Icon left>{checkedString}</Icon>
         </span>
         {item.text}
         {showComplete?
-          <span onClick={()=>deleteItem(item.key)}>
+          <span onClick={()=>deleteItem(item.id)}>
             <Icon right>delete</Icon>
           </span>:null}
       </li>)

@@ -10,7 +10,7 @@ class App extends Component {
     super()
     this.state = {
       items: [],
-      currentItem: {text: '', key: '', completed: false},
+      currentItem: {text: '', id: '', completed: false},
     }
   }
 
@@ -32,7 +32,7 @@ class App extends Component {
 
   handleInput = event => {
     const new_current =
-      {text: event.target.value, key: Date.now(), completed: false}
+      {text: event.target.value, id: Date.now(), completed: false}
     console.log("new current: ")
     console.log(new_current)
     this.setState({
@@ -40,33 +40,40 @@ class App extends Component {
     })
   }
 
-  toggleComplete = key => {
+  toggleComplete = id => {
     const updatedItems =
       this.state.items.map(item => {
-        return item.key === key? {...item, completed: !item.completed}:item
+        return item.id === id? {...item, completed: !item.completed}:item
       })
     this.setState({
       items: updatedItems,
-      currentItem: {text: '', key: '', completed: false},
+      currentItem: {text: '', id: '', completed: false},
     })
   }
 
   addItem = event => {
     event.preventDefault()
     const newItem = this.state.currentItem
-    if (newItem.text !== ''){
-      console.log(newItem)
-      const items = [...this.state.items, newItem]
-      this.setState({
-        items: items,
-        currentItem: { text: '', key: '' },
+    console.log(newItem)
+    fetch(
+      API_URL, 
+      {
+        headers:{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'},
+        method: 'POST', 
+        body: JSON.stringify(newItem)
       })
-    }
+    .then(response => response.json())
+    .then(result => this.setState({
+      items: [...this.state.items, newItem],
+      currentItem: { text: '', id: '' },}))
+    .catch(err => console.error('Request failed', err))
   }
 
-  deleteItem = key => {
+  deleteItem = id => {
     const filteredItems = this.state.items.filter(item => {
-      return item.key !== key
+      return item.id !== id
     })
     this.setState({
       items: filteredItems,
