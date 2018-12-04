@@ -3,6 +3,8 @@ import './App.css';
 import TodoList from './TodoList'
 import TodoItems from './TodoItems'
 
+const API_URL = 'https://5c054cf66b84ee00137d2573.mockapi.io/api/todos'
+
 class App extends Component {
   constructor() {
     super()
@@ -10,6 +12,20 @@ class App extends Component {
       items: [],
       currentItem: {text: '', key: '', completed: false},
     }
+  }
+
+  componentDidMount() {
+    this.fetchTodos()
+  }
+
+  fetchTodos = () => {
+    this.setState({...this.state, isFetching: true})
+    fetch(API_URL)
+      .then(response => response.json())
+      .then(result => this.setState({items: result,
+                                     isFetching: false}))
+      //.then(result => console.log(result))
+      .catch(e => console.log(e));
   }
 
   inputElement = React.createRef()
