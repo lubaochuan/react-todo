@@ -41,7 +41,7 @@ class App extends Component {
   }
 
   toggleComplete = id => {
-    let item = this.state.items.find(obj => obj.id == id);
+    let item = this.state.items.find(obj => obj.id === id);
     item = {...item, completed: !item.completed}
 
     fetch(
@@ -82,7 +82,7 @@ class App extends Component {
       })
     .then(response => response.json())
     .then(result => this.setState({
-      items: [...this.state.items, newItem],
+      items: [...this.state.items, result],
       currentItem: { text: '', id: '' },}))
     .catch(err => console.error('Request failed', err))
   }
