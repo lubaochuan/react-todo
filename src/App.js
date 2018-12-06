@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import TodoList from './TodoList'
 import TodoItems from './TodoItems'
-
-const API_URL = 'https://5c054cf66b84ee00137d2573.mockapi.io/api/todos'
+import firebase from './firebase.js'
 
 class App extends Component {
   constructor() {
@@ -15,24 +14,28 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.fetchTodos()
-  }
-
-  fetchTodos = () => {
-    this.setState({...this.state, isFetching: true})
-    fetch(API_URL)
-      .then(response => response.json())
-      .then(result => this.setState({items: result,
-                                     isFetching: false}))
-      //.then(result => console.log(result))
-      .catch(e => console.log(e));
+    const itemsRef = firebase.database().ref('items')
+    itemsRef.on('value', (snapshot) => {
+      let items = snapshot.val()
+      console.log('snapshot')
+      console.log(items)
+      let newItems = []
+      for (let item in items) {
+        newItems.push({
+          id: item,
+          text: items[item].text,
+          completed: items[item].completed
+        })
+      }
+      this.setState({items: newItems})
+    })
   }
 
   inputElement = React.createRef()
 
   handleInput = event => {
     const new_current =
-      {text: event.target.value, id: Date.now(), completed: false}
+      {text: event.target.value, completed: false}
     console.log("new current: ")
     console.log(new_current)
     this.setState({
@@ -41,72 +44,30 @@ class App extends Component {
   }
 
   toggleComplete = id => {
-    let item = this.state.items.find(obj => obj.id === id);
-    item = {...item, completed: !item.completed}
-
-    fetch(
-      API_URL+'/'+id,
-      {
-        headers:{
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'},
-        method: 'PUT',
-        body: JSON.stringify(item)
-      })
-      .then(response => response.json())
-      .then(result => {
-        const updatedItems =
-          this.state.items.map(item => {
-            return item.id === id? {...item, completed: !item.completed}:item
-          })
-        this.setState({
-          items: updatedItems,
-          currentItem: {text: '', id: '', completed: false},
-        })
-      })
-      .catch(err => console.error('Request failed', err))
+    const itemRef = firebase.database().ref(`items/${id}`)
+    const item = this.state.items.find(obj => obj.id === id)
+    itemRef.set({
+      completed: !item.completed,
+      text: item.text
+    })
   }
 
   addItem = event => {
     event.preventDefault()
-    const newItem = this.state.currentItem
-    console.log(newItem)
-    fetch(
-      API_URL,
-      {
-        headers:{
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'},
-        method: 'POST',
-        body: JSON.stringify(newItem)
-      })
-    .then(response => response.json())
-    .then(result => this.setState({
-      items: [...this.state.items, result],
-      currentItem: { text: '', id: '' },}))
-    .catch(err => console.error('Request failed', err))
+    const itemsRef = firebase.database().ref('items')
+    const item = {
+      text: this.state.currentItem.text,
+      completed: this.state.currentItem.completed
+    }
+    console.log("new item")
+    console.log(item)
+    itemsRef.push(item)
+    this.setState({currentItem: { text: '', completed: false}})
   }
 
   deleteItem = id => {
-    fetch(
-      API_URL+'/'+id,
-      {
-        headers:{
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'},
-        method: 'DELETE'
-      })
-      .then(response => response.json())
-      .then(result => {
-        console.log('deleted:', result)
-        const filteredItems = this.state.items.filter(item => {
-          return item.id !== id
-        })
-        this.setState({
-          items: filteredItems,
-        })
-      })
-      .catch(err => console.error('Request failed', err))
+    const itemRef = firebase.database().ref(`/items/${id}`)
+    itemRef.remove()
   }
 
   render() {
